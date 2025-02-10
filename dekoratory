@@ -1,0 +1,235 @@
+# %% [markdown]
+# # Od zera do Hackera - Dekoratory 🎨
+
+# %% [markdown]
+# 
+# przygotowała Karolina Stolarczyk
+
+# %%
+import time
+
+# %% [markdown]
+# Dekoratory są bardzo przydatnym narzędziem w Pythonie, bo pozwalają modyfikować zachowanie funkcji lub klasy. Dekoratory pozwalają 'opakować' (wrapp) funkcję pierwotną w inną funkcję, tym samym nie zmieniając trwale funkcji pierwotnej. 
+
+# %% [markdown]
+# ## 0. Pewne właściwości funkcji: <br>
+# 1. można ją zapisać w zmiennej, <br>
+# 2. może być parametrem innej funkcji, <br>
+# 3. można zwrócić funkcję z funkcji. <br>
+
+# %% [markdown]
+# AD 1.
+
+# %%
+def upper_text(text):
+    return text.upper()
+
+# %%
+zmienna = upper_text
+
+# %%
+zmienna('od zera do hackera')
+
+# %%
+upper_text('od zera do hackera')
+
+# %% [markdown]
+# AD 2.
+
+# %%
+def exclamation_mark(text):
+    return text + ' !'
+
+# %%
+def sentence(func): 
+    s = func('Pajton nie gryzie') 
+    print (s) 
+
+# %%
+sentence(exclamation_mark)
+
+# %%
+sentence(upper_text)
+
+# %% [markdown]
+# AD 3.
+
+# %%
+def create_adder(x): 
+    def adder(y): 
+        return x+y 
+    return adder 
+
+# %%
+adder_123 = create_adder(123)
+# adder_123 ma postać:
+# def adder(y): 
+#     return 123+y 
+
+
+# %%
+adder_123(1)
+
+# %% [markdown]
+# ## 1. Składnia dekoratora
+
+# %% [markdown]
+# W dekoratorach funkcje są przyjmowane jako argument innej funkcji, a następnie wywoływane wewnątrz funkcji opakowującej.
+
+# %%
+# przykładowy dekorator
+def nasz_decorator(func):
+
+    # nasz_wrapper jest wrapperem NASZEJ FUNKCJI (tej w argumencie) 'func'
+    
+    # funkcja wewnętrzna ma dostęp do NASZEJ FUNKCJI 'func'
+    def nasz_wrapper():
+        print("To się dzieje przed wywołaniem funkcji.")
+
+        # wywołanie NASZA FUNKCJA wewnątrz funkcji wrapper.
+        func()
+
+        print("To się dzieje po wywołaniu funkcji.")
+        
+    return nasz_wrapper
+
+# %%
+# funkcja, którą wywołamy wewnątrz wrappera
+def nasza_funkcja():
+    print("Teraz wykonuje się NASZA FUNKCJA!")
+
+# %%
+# wywołanie funkcji z dekoratorem
+nasza_funkca_z_dekoratorem = nasz_decorator(nasza_funkcja)
+# nasza_funkca_z_dekoratorem = nasza_funkcja
+
+# calling the function
+nasza_funkca_z_dekoratorem()
+
+# %% [markdown]
+# Praktyczna składnia - przed zdefiniowaniem funkcji dodajemy nazwę dekoratora z symbolem @ - to daje udekorowanie forever
+
+# %%
+@nasz_decorator
+def nasza_funkcja2():
+    print("Teraz wykonuje się NASZA druga FUNKCJA!")
+
+# %%
+nasza_funkcja2()
+
+# %% [markdown]
+# ## 2. Przykład - mierzenie czasu wykonywania funkcji
+
+# %%
+def measuretime(func):
+    def wrapper():
+        starttime = time.perf_counter()
+        func()
+        endtime = time.perf_counter()
+        print(f"Czas potrzebny do wykonania funkcji: {endtime - starttime} sekund")
+    return wrapper
+
+# %%
+@measuretime
+def wastetime():
+    sum([i**2 for i in range(1000000)])
+
+# %%
+wastetime()
+
+# %% [markdown]
+# ## 3. Przykład - testy i debugowanie 
+
+# %%
+def debug(func):
+    def wrapper():
+        print(f"Teraz wykonuje się funkcja: {func.__name__}.")
+        func()
+    return wrapper
+
+
+# %%
+@debug
+def more_wastetime():
+    sum([i**2 for i in range(5000000)])
+
+# %%
+more_wastetime()
+
+# %% [markdown]
+# ## 4. Co jeśli funkcje mają argumenty?
+
+# %% [markdown]
+# Wtedy musimy we wraperze dodać argumenty w postaci *args, **kwargs.
+
+# %%
+def nasz_decorator2(func):
+    def wrapper(*args, **kwargs):
+        
+        print("To się dzieje przed wywołaniem funkcji.")
+        
+        # wywołanie funkcji z argumentami
+        returned_value = func(*args, **kwargs)
+
+        print("To się dzieje po wywołaniu funkcji.")
+        
+        # zwrócenie wywołanej funkcji
+        return returned_value
+        
+    return wrapper
+
+# %%
+# utworzenie funkcji z dekoratorem
+@nasz_decorator2
+def sum_two_numbers(a, b):
+    return a + b
+
+# %%
+a, b = 123, 456
+sum_two_numbers(a, b)
+
+# %% [markdown]
+# ## 5. Przykład - mierzenie czasu wywołania funkcji z argumentami
+
+# %%
+def measuretime2(func):
+    def wrapper(*args, **kwargs):
+        starttime = time.perf_counter()
+        returned_value = func(*args, **kwargs)
+        endtime = time.perf_counter()
+        print(f"Czas potrzebny do wykonania funkcji: {endtime - starttime} sekund")
+        return returned_value 
+    return wrapper
+
+# %%
+# utworzenie funkcji z dekoratorem
+@measuretime2
+def multiply_two_numbers(a, b):
+    return a * b
+
+# %%
+a, b = 123, 456
+multiply_two_numbers(a, b)
+
+# %% [markdown]
+# ## 6. Przykład - testy i debugowanie 
+
+# %%
+def debug2(func):
+    def wrapper(*args, **kwargs):
+        print(f"Teraz wykonuje się funkcja: {func.__name__} z args: {args} i kwargs: {kwargs}.")
+        returned_value = func(*args, **kwargs)
+        print(f"Fuknckja {func.__name__} została wykonana z wynikiem: {returned_value}.")
+        return returned_value
+    return wrapper
+
+
+# %%
+@debug2
+def jakas_suma(nbr):
+    return sum([i**2 for i in range(nbr)])
+
+# %%
+jakas_suma(123456)
+
+
