@@ -13,11 +13,11 @@ This repository contains materials and resources for various workshops, code exa
 ## Getting Started
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/karolinastolarczyk/workshop-materials.git
+   git clone https://github.com/karolinastolarczyk/workshop_materials.git
    ```
 2. **Navigate to the folder:**
    ```bash
-   cd workshop-materials
+   cd workshop_materials
    ```
 
 ## Requirements
